@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Experiment</title>
+
+    <script src="jspsych/jspsych.js"></script>
+    <script src="jspsych/plugin-preload.js"></script>
+    <script src="jspsych/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych/plugin-html-keyboard-responseMAS.js"></script>
+    <script src="jspsych/plugin-survey-html-form.js"></script>
+    <script src="jspsych/plugin-image-keyboard-response_MAS.js"></script>
+    <script src="jspsych/plugin-image-keyboard-response_MAS_2images.js"></script>
+    <script src="jspsych/plugin-image-keyboard-response.js"></script>
+    <script src="jspsych/plugin-html-slider-response.js"></script>
+    <script src="jspsych/plugin-html-button-response.js"></script>
+    <script src="jspsych/plugin-survey-text.js"></script>
+    <script src="jspsych/plugin-fullscreen.js"></script>
+    <script src="jspsych/plugin-survey-multi-choice.js"></script>
+    <script src="jspsych/plugin-survey-multi-select.js"></script>
+    <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
+    <script src="colorCalibration_srgb_ColorHier.js"></script>
+    <script src = "ishiharaPlates.js"></script>
+    <link href="jspsych/jspsych.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body></body>
+
+<!--------------------- Here is where the experiment is created ------------------------------------------->
+  <script>
+
+// ---------- UPDATE THESE AS NEEDED------------------//
+
+    //COLOR HIERARCHY EXPERIMENT IN-PERSON
+
+    //General experiment info to update
+    console.log("Updated last: 10/28-v1")
+
+    var studyName = "ColorHierarchy_v1"
+
+    var expServer = 1 // 0 = testing mode; 1 = on server 
+        console.log("serverMode", expServer)
+
+    var expType = 2 // 0 = SONA in-lab version; 1 = sona ONLINE ; 2 = CloudResearch online version (relevant for consent & debriefing)
+        console.log("consent:", expType)
+
+  
+    var expTime = 45; // How long experiment will take in minutes
+    var experimenterName = "mschoenl@highpoint.edu"  //Update to your contact info. this is presented if an error arises for a participantd
+    var numConditions = 1; //Number of conditions. 
+    var numTasks = 3;  //Number of experimental tasks (add 1 to include Color vision test)
+
+    //CloudResearch completion code 
+    var completion_code = "D55C24E42E";  //Code copied from mTurk Cloud Research Fixed completion code
+
+
+     //Debriefing script- presents at very end of experiment. Describes the purpose of the experiment. Statements automatically included about receiving sona credit or entering a code for mTurk HITT. 
+    // NOTE: if you have more than one between subjects condition, you MUST describe what the different conditions did/saw. 
+    var debriefScript = "<p>Great job! You have finished the experiment.</p>"
+
+
+    // Set background color  
+    document.body.style.backgroundColor = "rgb(122, 121, 120)"             
+
+   
+
+
+/*----------------------------------START OF EXPERIMENT TIMELINE: DO NOT CHANGE ------------------------------------ */
+
+  // Pop-up box if people try to leave the page (including refreshing) 
+    window.onbeforeunload = function() {
+        return "If you leave or refresh the page, you will not be able to finish the experiment.";
+    };
+
+    //initialize and prompt global variables to record
+    var jsPsych = initJsPsych({
+      on_trial_finish: function(data) {
+          if (data) {
+            data.subjectID = subject_id;
+            data.condition = whichCondition;
+            data.workerID = workerID;
+            data.startTime = start_time;
+            data.expVersion = studyName;
+
+          }
+      },
+      on_finish: function() {
+        if (expServer == 0){
+          jsPsych.data.displayData();
+          jsPsych.data.get().localSave('csv',subject_id+".csv", {flatten:true}) // saves to local device if not on server. 
+        }
+      }
+    });
+
+
+    //give subjects a random ID
+    const subject_id = jsPsych.randomization.randomID(10);
+    const filename = `${subject_id}.csv`;
+    var urlvar = jsPsych.data.urlVariables();
+    var workerID = urlvar.id // urlvar.id  
+
+
+    // Set condition
+    function getRandomIntInclusive(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return  Math.floor(Math.random() * (max - min + 1));
+        }
+    assigned_condition = getRandomIntInclusive(0,numConditions-1);
+    var whichCondition = assigned_condition; 
+    console.log("whichCondition: ", whichCondition)
+
+             
+
+    // Get Start time
+    var start_time = new Date();
+
+
+    //Initialize colors
+    var calibrationColors = colorCalibration_srgb()
+    var promptedColorR1 = calibrationColors["Red"]
+    var promptedColorG1 = calibrationColors["Green"]
+    var promptedColorB1 = calibrationColors["Blue"]
+
+    console.log("backgroundrgb:", rBackground, gBackground, bBackground)
+
+
+    //start timeline
+    var timeline = [];
+
+
+/*----------------------------------Load Standard functions & variables ------------------------------------ */
+
+    //Fixation trial
+    var fixation = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: '<div style="font-size:60px;">+</div>',
+        choices: "NO_KEYS",
+        trial_duration: 500, 
+        data: {
+            task: 'fixation'
+        }
+    };
+
+
+    // Utility function to shuffle an array (Fisher-Yates)
+  function shuffle(array) {
+    let arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+//pre-load images 
+  const shapes = ["curvy", "pointy"];
+    const nums = [...Array(25).keys()];
+
+    const preload_images = shapes.flatMap(shape =>
+      nums.map(n => `img/spiky0.png`, `img/spiky1.png`, `img/slinky0.png`, `img/slinky1.png`, `img/cotton0.png`, `img/cotton1.png`, `img/plus0.png`, `img/plus1.png`, `img/hammer0.png`, `img/hammer1.png`,`img/stick0.png`,`img/stick1.png`,)
+    );
+
+
+  var preload = {
+    type: jsPsychPreload,
+   show_progress_bar: true,
+  message: 'Loading',
+  images: preload_images,
+  on_finish: function() {
+    console.log("All alien images preloaded");
+  }
+};
+
+    timeline.push(preload)
+
+
+
+
+// ------------------------------------ START OF EXPERIMENT TRIALS ------------------------------------//
+   
+
+if (expType == 0){ 
+
+//Booth trial
+var booth_trial = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: '<p>Experimenter:'+
+          '<p>First, please add the subject ID number to the end of the experiment URL & re-load by pressing "enter".'+
+          "<p>Second, which Booth is this: type the subject ID number and then continue.",
+      choices: ["6", "7"]
+      }
+    timeline.push(booth_trial) 
+
+
+ // Initial welcome screen
+    var initial_screen = {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: '<p>Experimenter:'+
+          '<p> please double check that the subjectID is at the end of the experiment URL.'+
+          '<br>Then click begin'+
+          '<p> Once you click that button, it will not be possible to restart the experiment.',
+      choices: ['Begin Experiment']
+    }
+    timeline.push(initial_screen);
+ 
+} else if (expType > 0){
+
+    // Initial welcome screen
+    var initial_screen = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: '<p><strong>Welcome to our experiment!</strong></p>' +
+            '<br>Please make sure you are using a computer to complete this experiment (i.e. NOT a phone or tablet).'+
+            "<br>Please ensure your monitor's brightness and volume is turned all the way up."+
+            '<br>For best viewing, please sit approximately 1.5 feet to 2 feet from your computer screen.</p>'+
+            '<br>At the bottom of this screen, you will see a button that says "Begin Experiment".'+
+            '<br>Please only click that button when you are ready to complete the '+expTime+' minute experiment in one sitting.</p>'+
+            '<p> Once you click that button, it will not be possible to restart the experiment.',
+        choices: ['Begin Experiment'] 
+            }
+    timeline.push(initial_screen);
+}
+
+var whichBooth = "";
+
+
+
+
+//Give each subject a random ID
+if (expType == 0){
+  var subjIDenter = {
+      type: jsPsychSurveyText,
+      questions: [
+          {prompt: "subjectID", name: 'subjNumber', rows: "1", columns: "15", required: true,},
+          {prompt: "Experimenter", name: 'experimenter', rows: "1", columns: "15", required: true,},
+          {prompt: "Confirm Booth Number", name: 'booth', rows: "1", columns: "15", required: true,}
+          ],
+      preamble: "Experimenter: please complete.",
+      button_label: "Begin",
+      randomize_question_order: false,
+      autocomplete: false
+      }
+  timeline.push(subjIDenter);
+
+ }
+
+  
+ // Consent form
+    var consentSign = {
+            type: jsPsychSurveyMultiSelect,
+            questions: [
+                {prompt: 
+                  `<div style="max-width: 900px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
+                   <div style="text-align:center;"><strong>HIGH POINT UNIVERSITY</strong></div>
+                  <p><div style="text-align:center;"><strong>Research Participant Consent Form</strong></div>
+                  <br><br><strong>Title of the Study: </strong>Investigating how people perceive and interpret visual information
+                 <p><strong>Principal Investigator:</strong> Dr. Melissa Schoenlein (mschoenl@highpoint.edu)
+                  <br><br>You have been asked to participate in a research study. The information in this form is meant to help you decide whether or not to participate. If you have any questions, please ask.
+                  <br><br><strong><u>Why you are being asked to be in this research study:</u></strong>
+                  <br>You have been asked to participate because you saw a description of the study, met the eligibility criteria, and signed up to participate via CloudResearch and/or Amazon Mechanical Turk. To be eligible, you must be at least 18 years of age.
+                  <br><br>The study will include approximately 1000 adults who agree to participate via Cloud Research and/or Amazon Mechanical Turk HITs.
+                  <br><br><strong><u>What the study is about:</u></strong>
+                  <br>You are invited to participate in this research study about how visual features influence the ability to perceive, interpret, and remember information in visual displays.  The purpose of this research is to understand the factors that influence how people learn about, perceive, and interpret visual information.
+                  <br><br><strong><u>What you will be asked to do:</u></strong>
+                  <br>If you decide to participate in this research, you will be shown visual displays on a computer containing images and/or text. You will be asked to make judgments about these displays. For example, you may see a novel object and be asked to learn the object’s name or you may be presented with colors and asked to rate how much that color reminds you of certain objects. These judgements can be made using button presses on a keyboard/mouse. You may also be asked to respond to questions about your experience during the experiment. For example, you may be asked what strategy you used to complete a task or how challenging the task felt. You may also be asked to complete a standard color vision test, which will examine your ability to perceive different colors. Some tasks may include sounds (e.g., beeps) that will be played via the computer speakers and/or headphones.
+                  <br>You will be asked to complete 1-6 tasks or questionnaires. Your participation will include 1 session that will last approximately 15-60 minutes, as indicated on SONA when you signed up to participate. 
+                  <br><br><div style="text-align:center;"><strong><u>Important Things to Know about Being Part of the Study</u></strong></div>
+                  <br> <div style="margin-left: 40px; text-align: left;">1. <strong>You don't have to do this.</strong> Participation is completely voluntary and you can withdraw at any time without penalty, even after you start. Deciding not to participate or deciding to withdraw will not affect your relationship with the investigator or High Point University.</div>
+                  <br> <div style="margin-left: 40px; text-align: left;">2. <strong>Pay.</strong> The amount of compensation depends on the length of the task, based on a rate of $10 per hour. The compensation amount for this HIT, as specified in the HIT description, was pre-determined based on the amount of time it took previous participants to do similar tasks. If you do withdraw prior to the end of the study, you will receive no compensation.</div>
+                  <br> <div style="margin-left: 40px; text-align: left;">3. <strong>Benefits.</strong> There are no direct benefits to participants for participating in this study. This research will benefit the field of psychology by furthering our knowledge of human behavior.</div>
+                  <br> <div style="margin-left: 40px; text-align: left;">4. <strong>Risks to you.</strong> We believe that there are minimal risks to you.  If you are hurt or experience any negative effects, you may seek treatment through a health service provider.</div>
+                  <br> <div style="margin-left: 40px; text-align: left;">5. <strong>Your responses will be kept confidential.</strong> Your name will not be stored with your responses and only those involved in the research project will have access to the responses of individuals.</div>
+                  <br> <div style="margin-left: 40px; text-align: left;">6. <strong>If you have questions about the study</strong> Please contact Dr. Melissa Schoenlein at <u>mschoenl@highpoint.edu</u> or 336-841-2878.</div> 
+                  <br> <div style="margin-left: 40px; text-align: left;">7. <strong>If you have questions regarding your rights as a subject in this study.</strong> You may contact Dr. Kimberly Wear Jones, IRB Chair, (336) 841-9246, kwjones@highpoint.edu.</div>
+                  <br><br><strong>Your data will be used for:</strong> Your data may be used as part of publications about this research. Further, your data may be sent to researchers outside of High Point University so that other scientists can replicate the experiment findings. Any personal information that could identify you will be removed before the data is shared or used publications.
+                  <br><br> By clicking the box below, you confirm that you have read this consent form, had an opportunity to ask any questions about your participation in this research and voluntarily consent to participate. You may print a copy of this form for your records.
+                  <br><br>Please click the box below next to the text “I consent” to give your informed consent to participate. 
+                </div>`,
+                options: [`<strong>I consent</strong>`],
+                horizontal: false,
+                required: true,
+                name: 'Consent'},
+                ],
+            button_label: "Start Experiment",
+            };
+
+  timeline.push(consentSign);
+
+
+/*-------------------- BEGINNING OF DEMOGRAPHIC INFO ----------------------------------------*/ 
+
+
+  //Enter fullscreen
+    var enter_fullscreen = {
+      type: jsPsychFullscreen,
+      fullscreen_mode: true
+  }
+  timeline.push(enter_fullscreen)
+   
+
+ 
+// Overview instructions of experiment 
+    var overview_instructions = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: 'Welcome! <p> This experiment involves several parts: demographic information, followed by '+numTasks+' tasks.' + 
+            '<p> It will take about '+expTime+' minutes to complete all parts.',
+        choices: ['Begin']
+    }
+    timeline.push(overview_instructions);
+
+    
+
+// Demographic questions
+    // Age, gender, race/ethnicity, and language  
+    var age_lang_demo = {
+        type: jsPsychSurveyText,
+        questions: [
+            {prompt: "Age", name: 'Age', rows: "1", columns: "3", required: true,},
+            {prompt: "Gender", name: 'Gender', rows: "1", columns: "15", required: true,},
+            {prompt: "Race/ethnicity", name: 'Race/ethnicity', rows: "1", columns: "30", required: true,},
+            {prompt: "List all languages you know", name: "Languages", rows: "1", columns: "40", required: true,}
+            ],
+        preamble: "Please answer the following questions. Click 'Done' to continue. ",
+        button_label: "Done",
+        randomize_question_order: false
+        }
+    timeline.push(age_lang_demo);
+
+
+
+
+
+/*----------------------------------Part 1: Fruits and Vegetables Categorization------------------------------------ */
+
+
+// Categorization Instructions 
+var cat_instructions = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<br><strong>TASK 1 of `+numTasks+`</strong></br>
+        <p>In this task, you will learn about two categories of alien foods: <strong>Luks</strong> and <strong>Smits</strong>.  
+        <p>There are <strong>4 types of Luks</strong> called: Blerfi, Pogen, Gerko, and Kowal. Some types of Luks are more typical than others.
+        <br>A typical Luk is generally <strong>circular</strong> in shape, but can have unique features. 
+        <p>There are also <strong>2 types of Smits</strong> called: Mikta and Flim. Some types of Smits are more typical than others.
+        <br>A typical Smit is generally <strong>linear</strong> in shape, but can also have unique features. 
+        <p>At the beginning of each trial, you will see an image of one type of food and two names. 
+          <br> Your task is to decide which of the names better represents the image. 
+        <br>Press the <strong>left arrow key</strong> if you think the left name is the better one. 
+        <br>Press the <strong>right arrow key</strong> if you think the right name is the better one. 
+        <p>After you respond you will see the correct answer. Then the food will move below to the correct name. 
+        <br>There will be a brief pause and the next trial will begin.
+        <p>At first, you may feel like you are guessing, but as you see more foods, you will feel more confident with your responses.
+        <p>There will be 3 blocks of trials for this task. At the end of each block, you will get to see your accuracy from that block.
+        <br>This task is expected to take about 10 of minutes.
+        <br>When you are ready, press the spacebar to begin`,
+        post_trial_gap: 500, 
+        choices: [" "],
+         data: {
+            task: 'Cat_instructions',
+        }
+    }; 
+    timeline.push(cat_instructions);
+
+
+// Setting up parameters for categorization // 
+    var breakCounter = 0; // Counts number of trials for a block
+    var blockCounter = 0; // Counts which block
+    var numSpecies = 6; 
+    var numAliensPerSpecies = 2;
+    var numAliensTotal = 12;
+    let alienCounter = new Array(numSpecies).fill().map(() => Array(numAliensPerSpecies).fill(0))
+   // var labels = ["SLINKY", "SPIKY"]
+
+
+    var numFruit = 4
+    var numVeggie = 2
+
+
+    var superFruit = ["LUK", "LUK", "LUK", "LUK"]
+    var superVeggie  = ["SMIT", "SMIT"]
+
+    var foodCategoryType = ["fruit", "veggie"]
+    var trialTypes = ["between", "within", "super"]
+      let targetName = ""
+      let distractorName = ""
+      let correctResponse = ""
+      let targetIndex = ""
+ 
+
+// Create a randomized mapping for a given participant For FRUITS
+const fruitNumbers = [0, 1, 2, 3];
+var basicFruit = ["BLERFI", "POGEN", "GERKO", "KOWAL"]
+const sBasicFruit = shuffle(basicFruit);
+var fruitMapping = {};
+fruitNumbers.forEach((num, i) => {
+  fruitMapping[num] = sBasicFruit[i];
+});
+
+//console.log("Number-to-Name Fruit Mapping:", fruitMapping);
+
+
+// Create a randomized mapping for a given participant - FOR VEGETABLES
+const veggieNumbers = [0, 1];
+var basicVeggie = ["MIKTA", "FLIM"]
+const sBasicVeggie = shuffle(basicVeggie);
+var veggieMapping = {};
+veggieNumbers.forEach((num, i) => {
+  veggieMapping[num] = sBasicVeggie[i];
+});
+
+//console.log("Number-to-Name Veggie Mapping:", veggieMapping);
+
+
+
+//Create procedure for a trial 
+var fruitImage = ["spiky", "slinky", "cotton", "plus"]
+var veggieImage = ["hammer", "stick"]
+
+const objNumbers= [...Array(2).keys()]; // 0–24
+const labelPosition = [...Array(2).keys()];
+
+let alien_stimuli = [];
+var trialTypes = ["between", "within", "super"];
+
+for (let labelSpot of labelPosition){
+  for (let foodCat of foodCategoryType) {
+
+  if (foodCat == "fruit") {
+    imageSet = fruitImage;
+  } else if (foodCat == "veggie") {
+    imageSet = veggieImage;
+  }
+
+
+  for (let image of imageSet) {
+    for (let objNum of objNumbers) {
+
+      for (let trialType of trialTypes) {
+        
+        if (trialType == "within") {
+
+          // Your WITHIN trial code goes here
+          if(foodCat == "fruit"){
+
+            if(image == "spiky"){
+              correctResponse = "";
+              targetIndex = 0
+              targetName = fruitMapping[targetIndex] //targetIndex];
+            
+            }else if (image == "slinky"){
+              correctResponse = "";
+              targetIndex = 1
+              targetName = fruitMapping[targetIndex] //targetIndex];
+
+            }else if (image == "cotton"){
+                correctResponse = "";
+                targetIndex = 2
+                targetName = fruitMapping[targetIndex] //targetIndex];
+
+            }else if (image == "plus"){
+                correctResponse = "";
+                targetIndex = 3
+                targetName = fruitMapping[targetIndex] //targetIndex];
+              }
+
+            var distractorOptions = Object.keys(fruitMapping).filter(key => key != targetIndex);
+            var distractorKey = distractorOptions[Math.floor(Math.random() * distractorOptions.length)];
+            distractorName = fruitMapping[distractorKey];
+            
+            }else if (foodCat == "veggie"){
+              if(image == "hammer"){
+              correctResponse = "";
+              targetIndex = 0
+              targetName = veggieMapping[targetIndex] //targetIndex];
+            
+              }else if (image == "stick"){
+                correctResponse = "";
+                targetIndex = 1
+                targetName = veggieMapping[targetIndex] //targetIndex];
+             }
+            
+            
+              //within veggie trial
+              var distractorOptions = Object.keys(veggieMapping).filter(key => key != targetIndex);
+              var distractorKey = distractorOptions[Math.floor(Math.random() * distractorOptions.length)];
+              distractorName = veggieMapping[distractorKey];
+            }
+
+        } else if (trialType == "between") {
+
+            // Your BETWEEN trial code goes here
+          if(foodCat == "fruit"){
+
+            if(image == "spiky"){
+              correctResponse = "";
+              targetIndex = 0
+              targetName = fruitMapping[targetIndex] //targetIndex];
+            
+            }else if (image == "slinky"){
+              correctResponse = "";
+              targetIndex = 1
+              targetName = fruitMapping[targetIndex] //targetIndex];
+
+            }else if (image == "cotton"){
+                correctResponse = "";
+                targetIndex = 2
+                targetName = fruitMapping[targetIndex] //targetIndex];
+
+            }else if (image == "plus"){
+                correctResponse = "";
+                targetIndex = 3
+                targetName = fruitMapping[targetIndex] //targetIndex];
+              }
+
+            var distractorOptions = Object.keys(veggieMapping).filter(key => key != targetIndex);
+            var distractorKey = distractorOptions[Math.floor(Math.random() * distractorOptions.length)];
+            distractorName = veggieMapping[distractorKey];
+
+            }else if (foodCat == "veggie"){
+              if (image == "hammer"){
+              correctResponse = "";
+              targetIndex = 0
+              targetName = veggieMapping[targetIndex] //targetIndex];
+
+              }else if (image == "stick"){
+                correctResponse = "";
+                targetIndex = 1
+                targetName = veggieMapping[targetIndex] //targetIndex];
+            }
+
+            var distractorOptions = Object.keys(fruitMapping).filter(key => key != targetIndex);
+            var distractorKey = distractorOptions[Math.floor(Math.random() * distractorOptions.length)];
+            distractorName = fruitMapping[distractorKey];
+
+         }
+      
+        } else if (trialType == "super") {
+
+            // Your BETWEEN trial code goes here
+          if(foodCat == "fruit"){
+
+            if(image == "spiky"){
+              correctResponse = "";
+              targetIndex = 0
+              targetName = superFruit[targetIndex] //targetIndex];
+            
+            }else if (image == "slinky"){
+              correctResponse = "";
+              targetIndex = 1
+              targetName = superFruit[targetIndex] //targetIndex];
+
+            }else if (image == "cotton"){
+                correctResponse = "";
+                targetIndex = 2
+                targetName = superFruit[targetIndex] //targetIndex];
+
+            }else if (image == "plus"){
+                correctResponse = "";
+                targetIndex = 3
+                targetName = superFruit[targetIndex] //targetIndex];
+              }
+
+            var distractorOptions = Object.keys(superVeggie).filter(key => key != targetIndex);
+            var distractorKey = distractorOptions[Math.floor(Math.random() * distractorOptions.length)];
+            distractorName = superVeggie[distractorKey];
+
+            }else if (foodCat == "veggie"){
+              if (image == "hammer"){
+              correctResponse = "";
+              targetIndex = 0
+              targetName = superVeggie[targetIndex] //targetIndex];
+
+              }else if (image == "stick"){
+                correctResponse = "";
+                targetIndex = 1
+                targetName = superVeggie[targetIndex] //targetIndex];
+            }
+
+            var distractorOptions = Object.keys(superFruit).filter(key => key != targetIndex);
+            var distractorKey = distractorOptions[Math.floor(Math.random() * distractorOptions.length)];
+            distractorName = superFruit[distractorKey];
+
+         }
+      
+        }
+
+      
+      //create distractor name
+      names = [targetName, distractorName]
+      sNames = shuffle(names)
+
+      leftLabel = sNames[0]; 
+      rightLabel = sNames[1]; 
+
+      if (leftLabel === targetName) {
+        correctResponse = "ArrowLeft";
+      } else if (rightLabel === targetName) {
+          correctResponse = "ArrowRight";
+      }
+
+      alien_stimuli.push({
+        stimulus: ` img/${image}${objNum}.png`,
+        correctResponse: correctResponse,
+        targetName: targetName, //species[specie],
+        alienNumber: objNum,
+        trialType: trialType, 
+        image: image, 
+        leftLabel: leftLabel,
+        rightLabel: rightLabel,
+        prompt: `<div style="position: relative; top: -200px; left: 0; text-align: center;">
+              <p style="font-size: 25px;">Which name better represents the below object?<p>Press the left or right arrow key</p>
+              <div style="display: flex; gap: 450px; margin-top: 60px;">
+              <p style="font-size: 30px;">`+leftLabel+`</p>
+              <p style="font-size: 30px;">`+rightLabel+`</p></div>
+              <p style="font-size: 25px;position: relative; top: -50px; color: rgb(`+rBackground+`,`+gBackground+`,`+bBackground+`);">----<br/>---</p>`
+        });
+      }
+    }
+    }
+  }
+}
+
+//`+rBackground+`,`+gBackground+`,`+bBackground+`
+           //   <div style="display: flex; width:100px; height:260px; position: relative; left: 245px; top:-70px; z-index: -1; " ></div>`//`+alienR+`,`+alienG+`,`+alienB+`);"></div>`
+
+
+
+    //Alien presentation trial
+    var showAlien = {
+        type: jsPsychImageKeyboardResponseMAS,
+        stimulus: jsPsych.timelineVariable('stimulus'),
+        stimulus_height: 250, 
+        stimulus_top: 375,
+        maintain_aspect_ratio: true,
+        render_on_canvas: false,  
+        choices: ['ArrowLeft', 'ArrowRight'],
+        prompt: jsPsych.timelineVariable('prompt'),
+        feedbackTrial: 0,
+        rgbBackground: [rBackground, gBackground, bBackground],
+        on_finish: function(data){
+            data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correctResponse);
+       },
+        data: {
+            task: 'sorting',           
+            bodyNumber: jsPsych.timelineVariable('alienNumber'),
+            correctResponse: jsPsych.timelineVariable('correctResponse'),
+            leftLabel: jsPsych.timelineVariable('leftLabel'),
+            rightLabel: jsPsych.timelineVariable('rightLabel'),
+            targetName: jsPsych.timelineVariable('targetName'),
+            prompt: jsPsych.timelineVariable('prompt'),     
+            trialType:  jsPsych.timelineVariable('trialType'),
+            image:  jsPsych.timelineVariable('image'),
+        }
+      }
+
+           
+      // //Alien feedback trial
+      // var feedbackAlien = {
+      //     type: jsPsychImageKeyboardResponseMAS,
+      //     stimulus: jsPsych.timelineVariable('stimulus'),
+      //     stimulus_height: 250,
+      //     stimulus_top:375,
+      //     maintain_aspect_ratio: true,
+      //     choices: "NO_KEYS",
+      //     trial_duration: 500, 
+      //      render_on_canvas: false,   
+
+      //     on_start: function(trial) {
+      //       const last_trial = jsPsych.data.get().last(1).values()[0];
+      //       const correct = last_trial.correct;
+      //       const targetName = last_trial.targetName; //
+      //       const leftLabel = last_trial.leftLabel;
+      //       const rightLabel = last_trial.rightLabel;
+      //       let feedbackText = correct
+      //         ? `YES<br>This is a <strong>${targetName}</strong>`
+      //         : `NO<br>This is a <strong>${targetName}</strong>`;
+      //       trial.prompt = 
+      //        `<div style="position: relative; top: -200px; left: 0; text-align: center;">
+      //         <p style="font-size: 25px;">Which name better represents the below object?<p>Press the left or right arrow key</p>
+      //         <div style="display: flex; gap: 450px; margin-top: 60px;">
+      //       <p style="font-size: 30px;">`+leftLabel+`</p>
+      //          <p style="font-size: 30px;">`+rightLabel+`</p></div>
+      //         <p style="font-size: 25px;position: relative; top: -50px;">${feedbackText}</p>`
+      //         },
+      //     data: {
+      //       task: 'feedback text',
+      //        leftLabel: jsPsych.timelineVariable('leftLabel'),
+      //       rightLabel: jsPsych.timelineVariable('rightLabel'),
+      //       targetName: jsPsych.timelineVariable('targetName'),
+      //       prompt: jsPsych.timelineVariable('prompt'),
+            
+      //     },
+      //   };
+
+                   //  <div style="display: flex; width:100px; height:260px; position: relative; left: 245px; top: -70px; z-index: -1; " ></div>`
+
+
+     //Alien feedback movement trial
+      var feedbackMoveAlien = {
+          type: jsPsychImageKeyboardResponseMAS,
+          stimulus: jsPsych.timelineVariable('stimulus'),
+          stimulus_height: 250,
+          stimulus_top:325,
+          maintain_aspect_ratio: true,
+          choices: "NO_KEYS",
+          trial_duration: 500,  
+          render_on_canvas: false,     
+          on_start: function(trial) {
+            const last_trial = jsPsych.data.get().last(1).values()[0]; //last 2 values
+            const correct = last_trial.correct;
+            const targetName = last_trial.targetName;
+            const leftLabel = last_trial.leftLabel;
+            const rightLabel = last_trial.rightLabel;
+              let feedbackText = correct
+              ? `YES<br>This is a <strong>${targetName}</strong>`
+              : `NO<br>This is a <strong>${targetName}</strong>`;
+
+            if (targetName == leftLabel){
+                trial.stimulus_left = -260;
+                squareLeft = -12;
+
+            }else if (targetName == rightLabel){
+                trial.stimulus_left = 260;
+                squareLeft = 510; 
+            }
+            trial.prompt = `
+              <div style="position: relative; top: -200px; left: 0; text-align: center;">
+              <p style="font-size: 25px;">Which name better represents the below object?<p>Press the left or right arrow key</p>
+              <div style="display: flex; gap: 450px; margin-top: 60px;">
+             <p style="font-size: 30px;">`+leftLabel+`</p>
+            <p style="font-size: 30px;">`+rightLabel+`</p></div>
+              <p style="font-size: 25px;position: relative; top: -50px;">${feedbackText}</p>
+             `
+          },
+          data: {
+            task: 'feedback movement',
+            leftLabel: jsPsych.timelineVariable('leftLabel'),
+            rightLabel: jsPsych.timelineVariable('rightLabel'),
+            targetName: jsPsych.timelineVariable('targetName'),
+            prompt: jsPsych.timelineVariable('prompt'),
+            
+          },
+        };
+        
+
+   var accuracy_block1 = {
+        type:  jsPsychHtmlKeyboardResponse,
+        stimulus: function () {
+            var trials = jsPsych.data.get()
+                .filter({task: 'sorting'})
+                .last(36);
+            var correct_trials = trials.filter({correct: true});
+            var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
+            var rt = Math.round(correct_trials.select('rt').mean());
+                    
+        return `<p>You have completed block 1 of 3 for this task of the experiment.</p>
+                <p>Your accuracy for this block was ${accuracy}%.</p>
+                <p>Press the spacebar when you are ready to continue.</p>`;
+        },
+        choices: [" "],
+    } 
+
+        
+       var accuracy_block2 = {
+        type:  jsPsychHtmlKeyboardResponse,
+        stimulus: function () {
+            var trials = jsPsych.data.get()
+                .filter({task: 'sorting'})
+                .last(36);
+            var correct_trials = trials.filter({correct: true});
+            var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
+            var rt = Math.round(correct_trials.select('rt').mean());
+                    
+        return `<p>You have completed block 2 of 3 for this task of the experiment.</p>
+                <p>Your accuracy for this block was ${accuracy}%.</p>
+                <p>Press the spacebar when you are ready to continue.</p>`;
+        },
+        choices: [" "],
+    } 
+      
+
+
+// Split into two unique sets of 36 trials
+var alien_sets = [
+    alien_stimuli.slice(0, 36),
+    alien_stimuli.slice(36, 72)
+];
+
+
+  //Block for alien trials
+  var alien_block1 = {
+    timeline: [fixation, showAlien,  feedbackMoveAlien], //feedbackAlien,
+    timeline_variables: alien_sets[0],
+    randomize_order: true,
+    repetitions: 1
+  };
+
+    //Block for alien trials
+  var alien_block2 = {
+    timeline: [fixation, showAlien,feedbackMoveAlien], // feedbackAlien, 
+    timeline_variables: alien_sets[1],
+    randomize_order: true,
+    repetitions: 1
+  };
+
+
+  // Select 18 trials: 6 objects x 3 question variations
+// Randomly select 1 of the 2 PNG versions for each combination
+    var alien_NoFeedStimuli = [];
+    var combinations = {};
+
+    alien_sets[0].forEach(trial => {
+        var key = trial.image + "_" + trial.trialType;
+
+        if (!combinations[key]) {
+        combinations[key] = [];
+        }
+        combinations[key].push(trial);
+        });
+
+    // Randomly select 1 trial from each object x question combination
+    Object.values(combinations).forEach(group => {
+    var selected = jsPsych.randomization.sampleWithoutReplacement(group, 1);
+    alien_NoFeedStimuli.push(selected[0]);
+    });
+    
+    // Randomize the order of the final 18 trials
+    alien_NoFeedStimuli = jsPsych.randomization.shuffle(alien_NoFeedStimuli);
+  
+
+
+   var alien_NoFeedBlock_Instr = {
+        type:  jsPsychHtmlKeyboardResponse,
+        stimulus:`<p><strong>Please note:</strong>
+                <p>In this next block, your task is the same. However, you will not recieve feedback after you respond.</p>
+                <p>Please try to be as accurate as possible.</p>
+                <p>Press the spacebar when you are ready to continue.</p>`,
+        choices: [" "],
+    } 
+
+  //Block for alien trials
+  var alien_NoFeedBlock = {
+    timeline: [fixation, showAlien],
+    timeline_variables: alien_NoFeedStimuli,
+    randomize_order: true,
+    repetitions: 1
+  };
+
+
+  //Block for alien trials
+  var alien_block_Rep = {
+    timeline: [alien_block1, accuracy_block1, alien_block2, accuracy_block2, alien_NoFeedBlock_Instr, alien_NoFeedBlock],// flower_block, flower_block],
+  };
+  timeline.push(alien_block_Rep)
+
+
+
+
+  if (expType == 0){
+    var passwordSurvey = {
+      type: jsPsychSurveyHtmlForm,
+      preamble: `<p>Great job!</p> You have completed part 1 of 3.
+                <p>Please let the experimenter know you have finished by opening the door or knocking on it. <br></br>
+                <br>Experimenter, please enter code to continue.`,
+      html: '<input name="secret_code" id="secret_code" type="password" autocomplete="off"required />',
+      autofocus: 'secret_code',
+      button_label: 'Continue',
+      required: true
+    };
+
+    timeline.push(passwordSurvey); 
+  }
+
+
+/* ---------------------------------- TASK 2: ASSOCIATION RATINGS ---------------------------------------- */
+
+
+
+//Create array of squares for block instructions screen
+    var stimulusColor = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    var alienColorText = ["LUK", "SMIT", "BLERFI", "GERKO",  "KOWAL",  "POGEN", "MIKTA", "FLIM"]
+    var arrayCounter =  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    var numTotalColors = 18; 
+    var numTotalTrials = 18*8*2
+    var numColorsPerCat = 36
+    var numColorCats = 8
+
+    //create looop of colors
+    for (i = 0; i < numTotalColors;){ //
+        var whichColor1 = getRandomIntInclusive(0,numColorsPerCat-1); 
+        if (arrayCounter[whichColor1] == 0){
+            stimulusColor[i] = [promptedColorR1[whichColor1], promptedColorG1[whichColor1], promptedColorB1[whichColor1]]
+            arrayCounter[whichColor1] = 1;
+            i++;
+        }        
+    }   
+
+
+  // split colors into rows
+  let row1 = stimulusColor.slice(0, 6);
+  let row2 = stimulusColor.slice(6, 12); // 11 + 13 = 24
+  let row3 = stimulusColor.slice(12, 18);
+
+  // function to turn an array of RGBs into a row of divs
+  function makeColorRow(row) {
+    return `<div style="display:flex; justify-content:center; margin:3px 0;">` +
+      row.map(rgb => {
+        let [r, g, b] = rgb;
+        return `<div style="
+          width:40px; height:40px;
+          background-color: rgb(${r},${g},${b});
+          margin: 8px;
+        "></div>`;
+      }).join("") +
+    `</div>`;
+  }
+
+  // combine rows
+  let colorRowsHTML = makeColorRow(row1) + makeColorRow(row2) + makeColorRow(row3);
+
+
+// Define instructions trial 
+var preload
+    var instrAssoc = {
+       type: jsPsychHtmlSliderResponse,    
+      stimulus: `<strong>TASK 2 of `+numTasks+`</strong>
+
+        <p>During this task you will be presented with each of the colored squares from the set below, one at a time
+        <br>You will be asked to rate how much you associate each color with each type of alien food</p>
+        <p>LUK, SMIT, BLERFI, GERKO, KOWAL, POGEN, MIKTA, or FLIM</p>
+        <p>You will be asked to rate the association between each color and food type on a scale from 'Not at all' to 'Very much' like the one below.
+        <br>To respond, slide the cursor along the response scale and then click the 'Continue' button to record your response and start the next trial.
+       <br>There will be eight blocks of trials, one for each food type. You will be asked to rate all of the colors for each food type before going on to the next block.   
+        ${colorRowsHTML}
+          <div style="position: relative; width: 400px; height: 18px;top: 35px; margin: 10px auto;">
+          <div style="position:absolute; left:2px; width:5px; height:20px; top: 0px; background:black;"></div>
+          <div style="position:absolute; left:50%; transform: translateX(-50%); width:5px; height:20px; top:0px; background:black;"></div>
+          <div style="position:absolute; right:-2px; width:5px; height:20px; top: 0px;  background:black;"></div>
+          </div>`,
+        prompt: `<div style=" margin-left: 60px; margin-right: 60px;">     
+        <p>Before we begin, please look at all the colors above. Please use the mouse to:
+        <br>point to a color that you think is VERY MUCH associated to LUK foods. And now a color that you think is NOT AT ALL associated to LUK foods.
+         <br>The color you associate the least for each food type would be rated on the far left of the scale, and the color you associate the most for each food type would be rated on the far right of the scale. 
+        All other colors would be rated somewhere in-between.
+         <br>Now lets do the same for the SMIT foods: a color VERY much associated, and one NOT AT ALL associated.
+        <p>Again, those colors will represent the far ends of the rating scale, such that they would be rated on the far left/right and all other colors would be rated somewhere in-between.
+        <br>Now lets do the same for the reamining food types: BLERFI, GERKO, KOWAL, POGEN, MIKTA, FLIM.
+        <br>This task will take about 20 minutes to complete
+        <br>When you are ready, click the 'Start' button to begin.</p>`,
+      post_trial_gap: 500, 
+      labels: [`<div style="font-size: 20px;">Not at<br>all</div>`, `<div style="font-size: 20px;">Very<br>much</div>`],
+      min: -200,
+      max: 200, 
+      slider_width: 400, 
+      slider_start: 0,
+      step: 1,
+      require_movement: false, 
+      response_ends_trial: true,
+      button_label: ["Start"],
+      data: {
+        task: "instructions"
+      }
+    };
+    timeline.push(instrAssoc);
+
+// Assign color category
+let speciesNames = ["LUK", "SMIT", "BLERFI", "GERKO",  "KOWAL",  "POGEN", "MIKTA", "FLIM"]
+let colorNumberIndex= [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
+let colorSeq;
+let colorSpecies;
+
+
+  //FILK set
+  let rating_stimuli_filk = [];
+  for(let colorNumber of colorNumberIndex){
+      colorSeq = "bodyColor";
+      colorSpecies = 0        
+       rating_stimuli_filk.push({stimulus: `<div style="position:relative; top: -100px; font-size: 30px;">
+          How much do you associate this color with
+          <p><strong>LUK</strong> foods?</p></div>
+          <div style="width:100px;height:100px; position: relative; left: 250px; top: -50px; background-color:rgb(`+promptedColorR1[colorNumber]+`,`+promptedColorG1[colorNumber]+`,`+promptedColorB1[colorNumber]+`);"></div>
+          <div style="position: relative; width: 400px; height: 18px;top: 35px; margin: 10px auto;">
+          <div style="position:absolute; left:2px; width:5px; height:20px; top: 0px; background:black;"></div>
+          <div style="position:absolute; left:50%; transform: translateX(-50%); width:5px; height:20px; top:0px; background:black;"></div>
+          <div style="position:absolute; right:-2px; width:5px; height:20px; top: 0px;  background:black;"></div>
+          </div>`,
+            colorSeq: colorSeq,
+            colorNumber: colorNumber,
+            species: "LUK",
+            colorSpecies: colorSpecies
+      })
+    }
+
+  //SLUB set
+  let rating_stimuli_slub = [];
+  for(let colorNumber of colorNumberIndex){
+      colorSeq = "bodyColor";
+      colorSpecies = 1,      
+       rating_stimuli_slub.push({stimulus: `<div style="position:relative; top: -100px; font-size: 30px;">
+              How much do you associate this color with
+              <p><strong>SMIT</strong> foods?</p></div>
+            <div style="width:100px;height:100px; position: relative; left: 250px; top: -50px; background-color:rgb(`+promptedColorR1[colorNumber]+`,`+promptedColorG1[colorNumber]+`,`+promptedColorB1[colorNumber]+`);"></div>
+           <div style="position: relative; width: 400px; height: 18px;top: 35px; margin: 10px auto;">
+          <div style="position:absolute; left:2px; width:5px; height:20px; top: 0px; background:black;"></div>
+          <div style="position:absolute; left:50%; transform: translateX(-50%); width:5px; height:20px; top:0px; background:black;"></div>
+          <div style="position:absolute; right:-2px; width:5px; height:20px; top: 0px;  background:black;"></div>
+          </div>`,
+            colorSeq: colorSeq,
+            colorNumber: colorNumber,
+            species: "SMIT",
+            colorSpecies: colorSpecies
+      })
+    }
+
+
+  //Association rating trial
+    var squareRate =  {
+      type: jsPsychHtmlSliderResponse,    
+      stimulus: jsPsych.timelineVariable('stimulus'),
+      labels: [`<div style="font-size: 20px;">Not at<br>all</div>`, `<div style="font-size: 20px;">Very<br>much</div>`],
+      min: -200,
+      max: 200, 
+      slider_width: 400, 
+      slider_start: 0,
+      step: 1,
+      require_movement: true, 
+      response_ends_trial: true,
+      feedbackTrial: 0, 
+      data: {
+        task: "rating trial",
+        colorSeq: jsPsych.timelineVariable('colorSeq'),
+        colorNumber: jsPsych.timelineVariable('colorNumber'),
+        targetName: jsPsych.timelineVariable('species'),
+        colorSpecies: jsPsych.timelineVariable('colorSpecies')
+      }
+    }
+
+    //Block Break filk
+    var block_break_filk = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>LUK</strong> foods.
+          <p>Press the spacebar to continue.</div>`,
+        post_trial_gap: 500, 
+        response_ends_trial: true,
+        choices: " ",
+          data: {
+            task: 'block break'
+        }
+    };
+
+    //Block Break slub
+    var block_break_slub = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>SMIT</strong> foods.
+                  <p>Press the spacebar to continue.</div>`,
+        post_trial_gap: 500, 
+        response_ends_trial: true,
+        data: {
+            task: 'block break'
+        }
+    };
+
+  
+    //FIlk block
+    var filk_trials = {
+        timeline: [fixation, squareRate],
+        timeline_variables: rating_stimuli_filk,
+        repetitions: 2,
+        randomize_order: true
+    }
+    var filk_procedure = {
+        timeline: [block_break_filk, filk_trials],
+    }
+
+    //Slub block
+    var slub_trials = {
+        timeline: [fixation, squareRate],
+        timeline_variables: rating_stimuli_slub,
+        repetitions: 2,
+        randomize_order: true
+    }
+    var slub_procedure = {
+        timeline: [block_break_slub, slub_trials],
+    }
+
+   
+
+    //Rating procedure all 
+    var rating_procedure = {
+        timeline: jsPsych.randomization.shuffle([filk_procedure, slub_procedure]),
+    }
+    timeline.push(rating_procedure);
+
+// basic level names
+
+  let rating_stimuli_BLERFI = [];
+  for(let colorNumber of colorNumberIndex){
+      colorSeq = "bodyColor";
+      colorSpecies = 0        
+       rating_stimuli_BLERFI.push({stimulus: `<div style="position:relative; top: -100px; font-size: 30px;">
+          How much do you associate this color with
+          <p><strong>BLERFI</strong> foods?</p></div>
+          <div style="width:100px;height:100px; position: relative; left: 250px; top: -50px; background-color:rgb(`+promptedColorR1[colorNumber]+`,`+promptedColorG1[colorNumber]+`,`+promptedColorB1[colorNumber]+`);"></div>
+          <div style="position: relative; width: 400px; height: 18px;top: 35px; margin: 10px auto;">
+          <div style="position:absolute; left:2px; width:5px; height:20px; top: 0px; background:black;"></div>
+          <div style="position:absolute; left:50%; transform: translateX(-50%); width:5px; height:20px; top:0px; background:black;"></div>
+          <div style="position:absolute; right:-2px; width:5px; height:20px; top: 0px;  background:black;"></div>
+          </div>`,
+            colorSeq: colorSeq,
+            colorNumber: colorNumber,
+            species: "BLERFI",
+            colorSpecies: colorSpecies
+      })
+    }
+
+  //SLUB set
+  let rating_stimuli_GERKO = [];
+  for(let colorNumber of colorNumberIndex){
+      colorSeq = "bodyColor";
+      colorSpecies = 1,      
+       rating_stimuli_GERKO.push({stimulus: `<div style="position:relative; top: -100px; font-size: 30px;">
+              How much do you associate this color with
+              <p><strong>GERKO</strong> foods?</p></div>
+            <div style="width:100px;height:100px; position: relative; left: 250px; top: -50px; background-color:rgb(`+promptedColorR1[colorNumber]+`,`+promptedColorG1[colorNumber]+`,`+promptedColorB1[colorNumber]+`);"></div>
+           <div style="position: relative; width: 400px; height: 18px;top: 35px; margin: 10px auto;">
+          <div style="position:absolute; left:2px; width:5px; height:20px; top: 0px; background:black;"></div>
+          <div style="position:absolute; left:50%; transform: translateX(-50%); width:5px; height:20px; top:0px; background:black;"></div>
+          <div style="position:absolute; right:-2px; width:5px; height:20px; top: 0px;  background:black;"></div>
+          </div>`,
+            colorSeq: colorSeq,
+            colorNumber: colorNumber,
+            species: "GERKO",
+            colorSpecies: colorSpecies
+      })
+    }
+
+      let rating_stimuli_KOWAL = [];
+  for(let colorNumber of colorNumberIndex){
+      colorSeq = "bodyColor";
+      colorSpecies = 0        
+       rating_stimuli_KOWAL.push({stimulus: `<div style="position:relative; top: -100px; font-size: 30px;">
+          How much do you associate this color with
+          <p><strong>KOWAL</strong> foods?</p></div>
+          <div style="width:100px;height:100px; position: relative; left: 250px; top: -50px; background-color:rgb(`+promptedColorR1[colorNumber]+`,`+promptedColorG1[colorNumber]+`,`+promptedColorB1[colorNumber]+`);"></div>
+          <div style="position: relative; width: 400px; height: 18px;top: 35px; margin: 10px auto;">
+          <div style="position:absolute; left:2px; width:5px; height:20px; top: 0px; background:black;"></div>
+          <div style="position:absolute; left:50%; transform: translateX(-50%); width:5px; height:20px; top:0px; background:black;"></div>
+          <div style="position:absolute; right:-2px; width:5px; height:20px; top: 0px;  background:black;"></div>
+          </div>`,
+            colorSeq: colorSeq,
+            colorNumber: colorNumber,
+            species: "BLERFI",
+            colorSpecies: colorSpecies
+      })
+    }
+
+  //SLUB set
+  let rating_stimuli_POGEN = [];
+  for(let colorNumber of colorNumberIndex){
+      colorSeq = "bodyColor";
+      colorSpecies = 1,      
+       rating_stimuli_POGEN.push({stimulus: `<div style="position:relative; top: -100px; font-size: 30px;">
+              How much do you associate this color with
+              <p><strong>POGEN</strong> foods?</p></div>
+            <div style="width:100px;height:100px; position: relative; left: 250px; top: -50px; background-color:rgb(`+promptedColorR1[colorNumber]+`,`+promptedColorG1[colorNumber]+`,`+promptedColorB1[colorNumber]+`);"></div>
+           <div style="position: relative; width: 400px; height: 18px;top: 35px; margin: 10px auto;">
+          <div style="position:absolute; left:2px; width:5px; height:20px; top: 0px; background:black;"></div>
+          <div style="position:absolute; left:50%; transform: translateX(-50%); width:5px; height:20px; top:0px; background:black;"></div>
+          <div style="position:absolute; right:-2px; width:5px; height:20px; top: 0px;  background:black;"></div>
+          </div>`,
+            colorSeq: colorSeq,
+            colorNumber: colorNumber,
+            species: "POGEN",
+            colorSpecies: colorSpecies
+      })
+    }
+
+
+      let rating_stimuli_MIKTA = [];
+  for(let colorNumber of colorNumberIndex){
+      colorSeq = "bodyColor";
+      colorSpecies = 0        
+       rating_stimuli_MIKTA.push({stimulus: `<div style="position:relative; top: -100px; font-size: 30px;">
+          How much do you associate this color with
+          <p><strong>MIKTA</strong> foods?</p></div>
+          <div style="width:100px;height:100px; position: relative; left: 250px; top: -50px; background-color:rgb(`+promptedColorR1[colorNumber]+`,`+promptedColorG1[colorNumber]+`,`+promptedColorB1[colorNumber]+`);"></div>
+          <div style="position: relative; width: 400px; height: 18px;top: 35px; margin: 10px auto;">
+          <div style="position:absolute; left:2px; width:5px; height:20px; top: 0px; background:black;"></div>
+          <div style="position:absolute; left:50%; transform: translateX(-50%); width:5px; height:20px; top:0px; background:black;"></div>
+          <div style="position:absolute; right:-2px; width:5px; height:20px; top: 0px;  background:black;"></div>
+          </div>`,
+            colorSeq: colorSeq,
+            colorNumber: colorNumber,
+            species: "MIKTA",
+            colorSpecies: colorSpecies
+      })
+    }
+
+  //SLUB set
+  let rating_stimuli_FLIM = [];
+  for(let colorNumber of colorNumberIndex){
+      colorSeq = "bodyColor";
+      colorSpecies = 1,      
+       rating_stimuli_FLIM.push({stimulus: `<div style="position:relative; top: -100px; font-size: 30px;">
+              How much do you associate this color with
+              <p><strong>FLIM</strong> foods?</p></div>
+            <div style="width:100px;height:100px; position: relative; left: 250px; top: -50px; background-color:rgb(`+promptedColorR1[colorNumber]+`,`+promptedColorG1[colorNumber]+`,`+promptedColorB1[colorNumber]+`);"></div>
+           <div style="position: relative; width: 400px; height: 18px;top: 35px; margin: 10px auto;">
+          <div style="position:absolute; left:2px; width:5px; height:20px; top: 0px; background:black;"></div>
+          <div style="position:absolute; left:50%; transform: translateX(-50%); width:5px; height:20px; top:0px; background:black;"></div>
+          <div style="position:absolute; right:-2px; width:5px; height:20px; top: 0px;  background:black;"></div>
+          </div>`,
+            colorSeq: colorSeq,
+            colorNumber: colorNumber,
+            species: "FLIM",
+            colorSpecies: colorSpecies
+      })
+    }
+
+
+
+    //Block Break filk
+    var block_break_BLERFI = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>BLERFI</strong> foods.
+          <p>Press the spacebar to continue.</div>`,
+        post_trial_gap: 500, 
+        response_ends_trial: true,
+        choices: " ",
+          data: {
+            task: 'block break'
+        }
+    };
+
+    //Block Break slub
+    var block_break_GERKO = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>GERKO</strong> foods.
+                  <p>Press the spacebar to continue.</div>`,
+        post_trial_gap: 500, 
+        response_ends_trial: true,
+        data: {
+            task: 'block break'
+        }
+    };
+
+        //Block Break filk
+    var block_break_KOWAL = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>KOWAL</strong> foods.
+          <p>Press the spacebar to continue.</div>`,
+        post_trial_gap: 500, 
+        response_ends_trial: true,
+        choices: " ",
+          data: {
+            task: 'block break'
+        }
+    };
+
+    //Block Break slub
+    var block_break_POGEN = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>POGEN</strong> foods.
+                  <p>Press the spacebar to continue.</div>`,
+        post_trial_gap: 500, 
+        response_ends_trial: true,
+        data: {
+            task: 'block break'
+        }
+    };
+
+        //Block Break filk
+    var block_break_MIKTA = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>MIKTA</strong> foods.
+          <p>Press the spacebar to continue.</div>`,
+        post_trial_gap: 500, 
+        response_ends_trial: true,
+        choices: " ",
+          data: {
+            task: 'block break'
+        }
+    };
+
+    //Block Break slub
+    var block_break_FLIM = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>FLIM</strong> foods.
+                  <p>Press the spacebar to continue.</div>`,
+        post_trial_gap: 500, 
+        response_ends_trial: true,
+        data: {
+            task: 'block break'
+        }
+    };
+
+
+  
+    //FIlk block
+    var BLERFI_trials = {
+        timeline: [fixation, squareRate],
+        timeline_variables: rating_stimuli_BLERFI,
+        repetitions: 2,
+        randomize_order: true
+    }
+    var BLERFI_procedure = {
+        timeline: [block_break_BLERFI, BLERFI_trials],
+    }
+
+    //Slub block
+    var GERKO_trials = {
+        timeline: [fixation, squareRate],
+        timeline_variables: rating_stimuli_GERKO,
+        repetitions: 2,
+        randomize_order: true
+    }
+    var GERKO_procedure = {
+        timeline: [block_break_GERKO, GERKO_trials],
+    }
+
+   
+        //FIlk block
+    var KOWAL_trials = {
+        timeline: [fixation, squareRate],
+        timeline_variables: rating_stimuli_KOWAL,
+        repetitions: 2,
+        randomize_order: true
+    }
+    var KOWAL_procedure = {
+        timeline: [block_break_KOWAL, KOWAL_trials],
+    }
+
+    //Slub block
+    var POGEN_trials = {
+        timeline: [fixation, squareRate],
+        timeline_variables: rating_stimuli_POGEN,
+        repetitions: 2,
+        randomize_order: true
+    }
+    var POGEN_procedure = {
+        timeline: [block_break_POGEN, POGEN_trials],
+    }
+
+        //FIlk block
+    var MIKTA_trials = {
+        timeline: [fixation, squareRate],
+        timeline_variables: rating_stimuli_MIKTA,
+        repetitions: 2,
+        randomize_order: true
+    }
+    var MIKTA_procedure = {
+        timeline: [block_break_MIKTA, MIKTA_trials],
+    }
+
+    //Slub block
+    var FLIM_trials = {
+        timeline: [fixation, squareRate],
+        timeline_variables: rating_stimuli_FLIM,
+        repetitions: 2,
+        randomize_order: true
+    }
+    var FLIM_procedure = {
+        timeline: [block_break_FLIM, FLIM_trials],
+    }
+
+
+    //Rating procedure all 
+    var rating_procedure_BASIC = {
+        timeline: jsPsych.randomization.shuffle([BLERFI_procedure, GERKO_procedure, POGEN_procedure, KOWAL_procedure, MIKTA_procedure, FLIM_procedure]),
+    }
+    timeline.push(rating_procedure_BASIC);
+
+
+
+
+
+if (expType == 0){
+      var passwordSurvey = {
+      type: jsPsychSurveyHtmlForm,
+      preamble: `<p>Great job!</p> You have completed part 2 of 3.
+                <p>Please let the experimenter know you have finished by opening the door or knocking on it. <br></br>
+                <br>Experimenter, please enter code to continue.`,
+      html: '<input name="secret_code" id="secret_code" type="password" autocomplete="off"required />',
+      autofocus: 'secret_code',
+      button_label: 'Continue',
+      required: true
+    };
+
+    timeline.push(passwordSurvey); 
+
+  }
+
+
+/* ---------------------------------- End of main experiment ---------------------------------------- */
+
+/* ------------------------------------ Color vision check --------------------------------------- */
+
+
+if (expType == 0){ //in-person (use booth A/B calibrations)//
+
+
+// ishihara
+var ishiharaReal= {
+  type: jsPsychSurveyMultiChoice,
+  questions: [
+      {prompt: "Experimenter: please complete ishihara plates. Then return to this screen.", name: 'colorvision', rows: "1", columns: "3", required: true,
+          options: ["Typ", "Atyp", "NA"],
+          horizontal: false,
+          required: true,
+          name: 'ishihara'},
+      ],  
+}
+timeline.push(ishiharaReal);
+
+
+
+} else if (expType >0){ //online (use srgb colors)
+
+
+// //Function for ishihara plates (online only)
+ ishiharaPlates()
+
+
+}
+
+/* --------------------------------------- End Color vision check ------------------------ */
+  
+
+// Save data
+   if (expServer == 1){
+      const save_data = {
+        type: jsPsychPipe,
+        action: "save",
+        experiment_id: "w9CB1tomDMJn",
+        filename: filename,
+        data_string: ()=>jsPsych.data.get().csv()
+      };
+    timeline.push(save_data)
+  }
+
+  
+           
+        
+// Exit fullscreen
+    var exit_fullscreen = {
+      type: jsPsychFullscreen,
+      fullscreen_mode: false
+  }
+  timeline.push(exit_fullscreen)
+   
+
+        //Debrief block
+    var debrief_block = {
+        type: jsPsychHtmlKeyboardResponse,
+           stimulus:  ` <div style="max-width: 80%; margin: 0 auto; padding: 20px;">
+                  <p><strong>Thank you for participating in our research study.</strong></p>
+                  <p>The purpose of this study is to examine how individuals form associations between abstract and concrete concepts.
+                  <p>In task 1, you learned about 2 types of foods: Luks and Smits, which each have several sub-types. A typical Luk is generally circular in shape, and a typical Smit is generally linear in shape. 
+                    <br>You saw examples of items from these categories and sorted them into their groups. 
+                    In task 2, you indicated your associations between the different colors and different category names. 
+                  <p>Our research question aims to understand whether the basic-level categories (the sub-types, like Mikta and Flim) influence the pattern of associations for the broader categories (e.g., Smit). 
+                    <br> We are also interested if the typicality of the sub-categories influences this relationship.
+                  Generally, this work is contributing to a body of research that aims to understand the factors that influence how people form associations between colors and concepts.
+                  <p>Please copy and paste the below code into CloudResearch to confirm your participation:
+                  <p><strong>+completion_code+</strong>
+                  <p>After you have entered the code in CloudResearch, you can close this page.
+                  <p>Thank you for participating! `,
+        choices: function(){
+          if(expServer == 0){
+            return [" "];
+          }else if (expServer == 1){
+            return ["NO_KEYS"];
+          }else{
+            return ["ArrowLeft"];
+          }
+        }
+      }
+    timeline.push(debrief_block);
+
+ 
+    // Run timeline
+    jsPsych.run(timeline)
+
+
+  </script>
+</html>
