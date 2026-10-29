@@ -33,7 +33,7 @@
     //COLOR HIERARCHY EXPERIMENT IN-PERSON
 
     //General experiment info to update
-    console.log("Updated last: 10/28-v1")
+    console.log("Updated last: 10/28-v2")
 
     var studyName = "ColorHierarchy_v1"
 
@@ -926,25 +926,20 @@ var preload
         <p>During this task you will be presented with each of the colored squares from the set below, one at a time
         <br>You will be asked to rate how much you associate each color with each type of alien food</p>
         <p>LUK, SMIT, BLERFI, GERKO, KOWAL, POGEN, MIKTA, or FLIM</p>
-        <p>You will be asked to rate the association between each color and food type on a scale from 'Not at all' to 'Very much' like the one below.
-        <br>To respond, slide the cursor along the response scale and then click the 'Continue' button to record your response and start the next trial.
-       <br>There will be eight blocks of trials, one for each food type. You will be asked to rate all of the colors for each food type before going on to the next block.   
         ${colorRowsHTML}
           <div style="position: relative; width: 400px; height: 18px;top: 35px; margin: 10px auto;">
           <div style="position:absolute; left:2px; width:5px; height:20px; top: 0px; background:black;"></div>
           <div style="position:absolute; left:50%; transform: translateX(-50%); width:5px; height:20px; top:0px; background:black;"></div>
           <div style="position:absolute; right:-2px; width:5px; height:20px; top: 0px;  background:black;"></div>
           </div>`,
-        prompt: `<div style=" margin-left: 60px; margin-right: 60px;">     
-        <p>Before we begin, please look at all the colors above. Please use the mouse to:
-        <br>point to a color that you think is VERY MUCH associated to LUK foods. And now a color that you think is NOT AT ALL associated to LUK foods.
-         <br>The color you associate the least for each food type would be rated on the far left of the scale, and the color you associate the most for each food type would be rated on the far right of the scale. 
-        All other colors would be rated somewhere in-between.
-         <br>Now lets do the same for the SMIT foods: a color VERY much associated, and one NOT AT ALL associated.
-        <p>Again, those colors will represent the far ends of the rating scale, such that they would be rated on the far left/right and all other colors would be rated somewhere in-between.
-        <br>Now lets do the same for the reamining food types: BLERFI, GERKO, KOWAL, POGEN, MIKTA, FLIM.
-        <br>This task will take about 20 minutes to complete
-        <br>When you are ready, click the 'Start' button to begin.</p>`,
+
+        prompt:` <p>You will be asked to rate the association between each color and food type on a scale from '<strong>Not at all</strong>' to '<strong>Very much</strong>', like the one below.
+        <br>To respond, slide the cursor along the response scale and then click the 'Continue' button to record your response and start the next trial.</p>
+        <p>There will be eight blocks of trials, one for each food type.
+        <br>You will be asked to rate all of the presented colors for each food type before going on to the next block.</p>
+          
+        <p>This task will take about 20 minutes to complete.
+        <br>Please press the <strong>Start</strong> button to view additional instructions for the first block.</p>`,
       post_trial_gap: 500, 
       labels: [`<div style="font-size: 20px;">Not at<br>all</div>`, `<div style="font-size: 20px;">Very<br>much</div>`],
       min: -200,
@@ -960,6 +955,18 @@ var preload
       }
     };
     timeline.push(instrAssoc);
+
+// prompt: `<div style=" margin-left: 60px; margin-right: 60px;">     
+//         <p>Before we begin, please look at all the colors above. Please use the mouse to:
+//         <br>point to a color that you think is VERY MUCH associated to LUK foods. And now a color that you think is NOT AT ALL associated to LUK foods.
+//          <br>The color you associate the least for each food type would be rated on the far left of the scale, and the color you associate the most for each food type would be rated on the far right of the scale. 
+//         All other colors would be rated somewhere in-between.
+//          <br>Now lets do the same for the SMIT foods: a color VERY much associated, and one NOT AT ALL associated.
+//         <p>Again, those colors will represent the far ends of the rating scale, such that they would be rated on the far left/right and all other colors would be rated somewhere in-between.
+//         <br>Now lets do the same for the reamining food types: BLERFI, GERKO, KOWAL, POGEN, MIKTA, FLIM.
+//         <br>This task will take about 20 minutes to complete
+//         <br>When you are ready, click the 'Start' button to begin.</p>`,
+
 
 // Assign color category
 let speciesNames = ["LUK", "SMIT", "BLERFI", "GERKO",  "KOWAL",  "POGEN", "MIKTA", "FLIM"]
@@ -1034,26 +1041,90 @@ let colorSpecies;
     }
 
     //Block Break filk
-    var block_break_filk = {
-        type: jsPsychHtmlKeyboardResponse,
-        stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>LUK</strong> foods.
-          <p>Press the spacebar to continue.</div>`,
-        post_trial_gap: 500, 
+    // var block_break_filk = {
+    //     type: jsPsychHtmlKeyboardResponse,
+    //     stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>LUK</strong> foods.
+    //       <p>Press the spacebar to continue.</div>`,
+    //     post_trial_gap: 500, 
+    //     response_ends_trial: true,
+    //     choices: " ",
+    //       data: {
+    //         task: 'block break'
+    //     }
+    // };
+
+    //Block Break LUK
+    var block_break_filk= {
+        type: jsPsychHtmlSliderResponse,
+        stimulus: `In this block, you will be asked to rate your association between each of the below colors and <p><strong>LUK</strong> foods.
+                  ${colorRowsHTML}
+          <div style="position: relative; width: 400px; height: 18px;top: 35px; margin: 10px auto;">
+          <div style="position:absolute; left:2px; width:5px; height:20px; top: 0px; background:black;"></div>
+          <div style="position:absolute; left:50%; transform: translateX(-50%); width:5px; height:20px; top:0px; background:black;"></div>
+          <div style="position:absolute; right:-2px; width:5px; height:20px; top: 0px;  background:black;"></div>
+          </div>`,
+            prompt: `Before starting, take a look at all the colors presented here and think about:  
+              <br>which color you associate the <strong>least</strong> (Not at all) with Luks
+              <br>which color you associate the <strong>most</strong> (Very much) with Luks   
+            <p>The color you associate the <strong>least</strong> with Luks should be rated on the far <strong>left</strong> of the scale ('Not at all'). 
+            <br> and the color you associate the <strong>most</strong> with Luks should be rated on the far <strong>right</strong> of the scale ('Very much').
+            <br> All other colors should be rated somewhere <strong>in-between</strong>.
+            <p>Press the "Start block" button to begin.</p>`,
+         post_trial_gap: 500, 
+      labels: [`<div style="font-size: 20px;">Not at<br>all</div>`,  `<div style="font-size: 20px;">Very<br>much</div>`],
+        min: -200,
+        max: 200, 
+        slider_width: 400, 
+        slider_start: 0,
+        step: 1,
+        require_movement: false, 
         response_ends_trial: true,
-        choices: " ",
+        button_label: ["Start block"],
           data: {
             task: 'block break'
         }
     };
 
-    //Block Break slub
+    // //Block Break slub
+    // var block_break_slub = {
+    //     type: jsPsychHtmlKeyboardResponse,
+    //     stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>SMIT</strong> foods.
+    //               <p>Press the spacebar to continue.</div>`,
+    //     post_trial_gap: 500, 
+    //     response_ends_trial: true,
+    //     data: {
+    //         task: 'block break'
+    //     }
+    // };
+
+        //Block Break  SMIT
     var block_break_slub = {
-        type: jsPsychHtmlKeyboardResponse,
-        stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>SMIT</strong> foods.
-                  <p>Press the spacebar to continue.</div>`,
-        post_trial_gap: 500, 
+        type: jsPsychHtmlSliderResponse,
+        stimulus: `In this block, you will be asked to rate your association between each of the below colors and <p><strong>SMIT</strong> foods.
+                  ${colorRowsHTML}
+          <div style="position: relative; width: 400px; height: 18px;top: 35px; margin: 10px auto;">
+          <div style="position:absolute; left:2px; width:5px; height:20px; top: 0px; background:black;"></div>
+          <div style="position:absolute; left:50%; transform: translateX(-50%); width:5px; height:20px; top:0px; background:black;"></div>
+          <div style="position:absolute; right:-2px; width:5px; height:20px; top: 0px;  background:black;"></div>
+          </div>`,
+            prompt: `Before starting, take a look at all the colors presented here and think about:  
+              <br>which color you associate the <strong>least</strong> (Not at all) with Smits
+              <br>which color you associate the <strong>most</strong> (Very much) with Smits
+            <p>The color you associate the <strong>least</strong> with Smits should be rated on the far <strong>left</strong> of the scale ('Not at all'). 
+            <br> and the color you associate the <strong>most</strong> with Smits should be rated on the far <strong>right</strong> of the scale ('Very much').
+            <br> All other colors should be rated somewhere <strong>in-between</strong>.
+            <p>Press the "Start block" button to begin.</p>`,
+         post_trial_gap: 500, 
+      labels: [`<div style="font-size: 20px;">Not at<br>all</div>`,  `<div style="font-size: 20px;">Very<br>much</div>`],
+        min: -200,
+        max: 200, 
+        slider_width: 400, 
+        slider_start: 0,
+        step: 1,
+        require_movement: false, 
         response_ends_trial: true,
-        data: {
+        button_label: ["Start block"],
+          data: {
             task: 'block break'
         }
     };
@@ -1218,76 +1289,265 @@ let colorSpecies;
 
 
     //Block Break filk
-    var block_break_BLERFI = {
-        type: jsPsychHtmlKeyboardResponse,
-        stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>BLERFI</strong> foods.
-          <p>Press the spacebar to continue.</div>`,
-        post_trial_gap: 500, 
+    // var block_break_BLERFI = {
+    //     type: jsPsychHtmlKeyboardResponse,
+    //     stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>BLERFI</strong> foods.
+    //       <p>Press the spacebar to continue.</div>`,
+    //     post_trial_gap: 500, 
+    //     response_ends_trial: true,
+    //     choices: " ",
+    //       data: {
+    //         task: 'block break'
+    //     }
+    // };
+
+        //Block Break blerfi
+    var block_break_BLERFI= {
+        type: jsPsychHtmlSliderResponse,
+        stimulus: `In this block, you will be asked to rate your association between each of the below colors and <p><strong>BLERFI</strong> foods.
+                  ${colorRowsHTML}
+          <div style="position: relative; width: 400px; height: 18px;top: 35px; margin: 10px auto;">
+          <div style="position:absolute; left:2px; width:5px; height:20px; top: 0px; background:black;"></div>
+          <div style="position:absolute; left:50%; transform: translateX(-50%); width:5px; height:20px; top:0px; background:black;"></div>
+          <div style="position:absolute; right:-2px; width:5px; height:20px; top: 0px;  background:black;"></div>
+          </div>`,
+            prompt: `Before starting, take a look at all the colors presented here and think about:  
+              <br>which color you associate the <strong>least</strong> (Not at all) with Blerfi.
+              <br>which color you associate the <strong>most</strong> (Very much) with Blerfi.   
+            <p>The color you associate the <strong>least</strong> with Blerfi should be rated on the far <strong>left</strong> of the scale ('Not at all'). 
+            <br> and the color you associate the <strong>most</strong> with Blerfi should be rated on the far <strong>right</strong> of the scale ('Very much').
+            <br> All other colors should be rated somewhere <strong>in-between</strong>.
+            <p>Press the "Start block" button to begin.</p>`,
+         post_trial_gap: 500, 
+      labels: [`<div style="font-size: 20px;">Not at<br>all</div>`,  `<div style="font-size: 20px;">Very<br>much</div>`],
+        min: -200,
+        max: 200, 
+        slider_width: 400, 
+        slider_start: 0,
+        step: 1,
+        require_movement: false, 
         response_ends_trial: true,
-        choices: " ",
+        button_label: ["Start block"],
           data: {
             task: 'block break'
         }
     };
 
     //Block Break slub
-    var block_break_GERKO = {
-        type: jsPsychHtmlKeyboardResponse,
-        stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>GERKO</strong> foods.
-                  <p>Press the spacebar to continue.</div>`,
-        post_trial_gap: 500, 
+    // var block_break_GERKO = {
+    //     type: jsPsychHtmlKeyboardResponse,
+    //     stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>GERKO</strong> foods.
+    //               <p>Press the spacebar to continue.</div>`,
+    //     post_trial_gap: 500, 
+    //     response_ends_trial: true,
+    //     data: {
+    //         task: 'block break'
+    //     }
+    // };
+
+        //Block Break LUK
+    var block_break_GERKO= {
+        type: jsPsychHtmlSliderResponse,
+        stimulus: `In this block, you will be asked to rate your association between each of the below colors and <p><strong>GERKO</strong> foods.
+                  ${colorRowsHTML}
+          <div style="position: relative; width: 400px; height: 18px;top: 35px; margin: 10px auto;">
+          <div style="position:absolute; left:2px; width:5px; height:20px; top: 0px; background:black;"></div>
+          <div style="position:absolute; left:50%; transform: translateX(-50%); width:5px; height:20px; top:0px; background:black;"></div>
+          <div style="position:absolute; right:-2px; width:5px; height:20px; top: 0px;  background:black;"></div>
+          </div>`,
+            prompt: `Before starting, take a look at all the colors presented here and think about:  
+              <br>which color you associate the <strong>least</strong> (Not at all) with Gerko.
+              <br>which color you associate the <strong>most</strong> (Very much) with Gerko.   
+            <p>The color you associate the <strong>least</strong> with Gerko should be rated on the far <strong>left</strong> of the scale ('Not at all'). 
+            <br> and the color you associate the <strong>most</strong> with Gerko should be rated on the far <strong>right</strong> of the scale ('Very much').
+            <br> All other colors should be rated somewhere <strong>in-between</strong>.
+            <p>Press the "Start block" button to begin.</p>`,
+         post_trial_gap: 500, 
+      labels: [`<div style="font-size: 20px;">Not at<br>all</div>`,  `<div style="font-size: 20px;">Very<br>much</div>`],
+        min: -200,
+        max: 200, 
+        slider_width: 400, 
+        slider_start: 0,
+        step: 1,
+        require_movement: false, 
         response_ends_trial: true,
-        data: {
+        button_label: ["Start block"],
+          data: {
             task: 'block break'
         }
     };
 
         //Block Break filk
-    var block_break_KOWAL = {
-        type: jsPsychHtmlKeyboardResponse,
-        stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>KOWAL</strong> foods.
-          <p>Press the spacebar to continue.</div>`,
-        post_trial_gap: 500, 
+    // var block_break_KOWAL = {
+    //     type: jsPsychHtmlKeyboardResponse,
+    //     stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>KOWAL</strong> foods.
+    //       <p>Press the spacebar to continue.</div>`,
+    //     post_trial_gap: 500, 
+    //     response_ends_trial: true,
+    //     choices: " ",
+    //       data: {
+    //         task: 'block break'
+    //     }
+    // };
+        //Block Break LUK
+    var block_break_KOWAL= {
+        type: jsPsychHtmlSliderResponse,
+        stimulus: `In this block, you will be asked to rate your association between each of the below colors and <p><strong>KOWAL</strong> foods.
+                  ${colorRowsHTML}
+          <div style="position: relative; width: 400px; height: 18px;top: 35px; margin: 10px auto;">
+          <div style="position:absolute; left:2px; width:5px; height:20px; top: 0px; background:black;"></div>
+          <div style="position:absolute; left:50%; transform: translateX(-50%); width:5px; height:20px; top:0px; background:black;"></div>
+          <div style="position:absolute; right:-2px; width:5px; height:20px; top: 0px;  background:black;"></div>
+          </div>`,
+            prompt: `Before starting, take a look at all the colors presented here and think about:  
+              <br>which color you associate the <strong>least</strong> (Not at all) with Kowal.
+              <br>which color you associate the <strong>most</strong> (Very much) with Kowal.   
+            <p>The color you associate the <strong>least</strong> with Kowal should be rated on the far <strong>left</strong> of the scale ('Not at all'). 
+            <br> and the color you associate the <strong>most</strong> with Kowal should be rated on the far <strong>right</strong> of the scale ('Very much').
+            <br> All other colors should be rated somewhere <strong>in-between</strong>.
+            <p>Press the "Start block" button to begin.</p>`,
+         post_trial_gap: 500, 
+      labels: [`<div style="font-size: 20px;">Not at<br>all</div>`,  `<div style="font-size: 20px;">Very<br>much</div>`],
+        min: -200,
+        max: 200, 
+        slider_width: 400, 
+        slider_start: 0,
+        step: 1,
+        require_movement: false, 
         response_ends_trial: true,
-        choices: " ",
+        button_label: ["Start block"],
           data: {
             task: 'block break'
         }
     };
 
     //Block Break slub
-    var block_break_POGEN = {
-        type: jsPsychHtmlKeyboardResponse,
-        stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>POGEN</strong> foods.
-                  <p>Press the spacebar to continue.</div>`,
-        post_trial_gap: 500, 
+    // var block_break_POGEN = {
+    //     type: jsPsychHtmlKeyboardResponse,
+    //     stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>POGEN</strong> foods.
+    //               <p>Press the spacebar to continue.</div>`,
+    //     post_trial_gap: 500, 
+    //     response_ends_trial: true,
+    //     data: {
+    //         task: 'block break'
+    //     }
+    // };
+        //Block Break LUK
+    var block_break_POGEN= {
+        type: jsPsychHtmlSliderResponse,
+        stimulus: `In this block, you will be asked to rate your association between each of the below colors and <p><strong>POGEN</strong> foods.
+                  ${colorRowsHTML}
+          <div style="position: relative; width: 400px; height: 18px;top: 35px; margin: 10px auto;">
+          <div style="position:absolute; left:2px; width:5px; height:20px; top: 0px; background:black;"></div>
+          <div style="position:absolute; left:50%; transform: translateX(-50%); width:5px; height:20px; top:0px; background:black;"></div>
+          <div style="position:absolute; right:-2px; width:5px; height:20px; top: 0px;  background:black;"></div>
+          </div>`,
+            prompt: `Before starting, take a look at all the colors presented here and think about:  
+              <br>which color you associate the <strong>least</strong> (Not at all) with Pogen.
+              <br>which color you associate the <strong>most</strong> (Very much) with Pogen.   
+            <p>The color you associate the <strong>least</strong> with Pogen should be rated on the far <strong>left</strong> of the scale ('Not at all'). 
+            <br> and the color you associate the <strong>most</strong> with Pogen should be rated on the far <strong>right</strong> of the scale ('Very much').
+            <br> All other colors should be rated somewhere <strong>in-between</strong>.
+            <p>Press the "Start block" button to begin.</p>`,
+         post_trial_gap: 500, 
+      labels: [`<div style="font-size: 20px;">Not at<br>all</div>`,  `<div style="font-size: 20px;">Very<br>much</div>`],
+        min: -200,
+        max: 200, 
+        slider_width: 400, 
+        slider_start: 0,
+        step: 1,
+        require_movement: false, 
         response_ends_trial: true,
-        data: {
+        button_label: ["Start block"],
+          data: {
             task: 'block break'
         }
     };
 
         //Block Break filk
-    var block_break_MIKTA = {
-        type: jsPsychHtmlKeyboardResponse,
-        stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>MIKTA</strong> foods.
-          <p>Press the spacebar to continue.</div>`,
-        post_trial_gap: 500, 
+    // var block_break_MIKTA = {
+    //     type: jsPsychHtmlKeyboardResponse,
+    //     stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>MIKTA</strong> foods.
+    //       <p>Press the spacebar to continue.</div>`,
+    //     post_trial_gap: 500, 
+    //     response_ends_trial: true,
+    //     choices: " ",
+    //       data: {
+    //         task: 'block break'
+    //     }
+    // };
+        //Block Break LUK
+    var block_break_MIKTA= {
+        type: jsPsychHtmlSliderResponse,
+        stimulus: `In this block, you will be asked to rate your association between each of the below colors and <p><strong>MIKTA</strong> foods.
+                  ${colorRowsHTML}
+          <div style="position: relative; width: 400px; height: 18px;top: 35px; margin: 10px auto;">
+          <div style="position:absolute; left:2px; width:5px; height:20px; top: 0px; background:black;"></div>
+          <div style="position:absolute; left:50%; transform: translateX(-50%); width:5px; height:20px; top:0px; background:black;"></div>
+          <div style="position:absolute; right:-2px; width:5px; height:20px; top: 0px;  background:black;"></div>
+          </div>`,
+            prompt: `Before starting, take a look at all the colors presented here and think about:  
+              <br>which color you associate the <strong>least</strong> (Not at all) with Mikta.
+              <br>which color you associate the <strong>most</strong> (Very much) with Mikta.
+            <p>The color you associate the <strong>least</strong> with Mikta should be rated on the far <strong>left</strong> of the scale ('Not at all'). 
+            <br> and the color you associate the <strong>most</strong> with Mikta should be rated on the far <strong>right</strong> of the scale ('Very much').
+            <br> All other colors should be rated somewhere <strong>in-between</strong>.
+            <p>Press the "Start block" button to begin.</p>`,
+         post_trial_gap: 500, 
+      labels: [`<div style="font-size: 20px;">Not at<br>all</div>`,  `<div style="font-size: 20px;">Very<br>much</div>`],
+        min: -200,
+        max: 200, 
+        slider_width: 400, 
+        slider_start: 0,
+        step: 1,
+        require_movement: false, 
         response_ends_trial: true,
-        choices: " ",
+        button_label: ["Start block"],
           data: {
             task: 'block break'
         }
     };
 
     //Block Break slub
-    var block_break_FLIM = {
-        type: jsPsychHtmlKeyboardResponse,
-        stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>FLIM</strong> foods.
-                  <p>Press the spacebar to continue.</div>`,
-        post_trial_gap: 500, 
+    // var block_break_FLIM = {
+    //     type: jsPsychHtmlKeyboardResponse,
+    //     stimulus: `<div style="font-size: 25px;">In this block, you will be asked to rate your association between each of the colors and <p><strong>FLIM</strong> foods.
+    //               <p>Press the spacebar to continue.</div>`,
+    //     post_trial_gap: 500, 
+    //     response_ends_trial: true,
+    //     data: {
+    //         task: 'block break'
+    //     }
+    // };
+
+        //Block Break LUK
+    var block_break_FLIM= {
+        type: jsPsychHtmlSliderResponse,
+        stimulus: `In this block, you will be asked to rate your association between each of the below colors and <p><strong>FLIM</strong> foods.
+                  ${colorRowsHTML}
+          <div style="position: relative; width: 400px; height: 18px;top: 35px; margin: 10px auto;">
+          <div style="position:absolute; left:2px; width:5px; height:20px; top: 0px; background:black;"></div>
+          <div style="position:absolute; left:50%; transform: translateX(-50%); width:5px; height:20px; top:0px; background:black;"></div>
+          <div style="position:absolute; right:-2px; width:5px; height:20px; top: 0px;  background:black;"></div>
+          </div>`,
+            prompt: `Before starting, take a look at all the colors presented here and think about:  
+              <br>which color you associate the <strong>least</strong> (Not at all) with Flim.
+              <br>which color you associate the <strong>most</strong> (Very much) with Flim.   
+            <p>The color you associate the <strong>least</strong> with Flim should be rated on the far <strong>left</strong> of the scale ('Not at all'). 
+            <br> and the color you associate the <strong>most</strong> with Flim should be rated on the far <strong>right</strong> of the scale ('Very much').
+            <br> All other colors should be rated somewhere <strong>in-between</strong>.
+            <p>Press the "Start block" button to begin.</p>`,
+         post_trial_gap: 500, 
+      labels: [`<div style="font-size: 20px;">Not at<br>all</div>`,  `<div style="font-size: 20px;">Very<br>much</div>`],
+        min: -200,
+        max: 200, 
+        slider_width: 400, 
+        slider_start: 0,
+        step: 1,
+        require_movement: false, 
         response_ends_trial: true,
-        data: {
+        button_label: ["Start block"],
+          data: {
             task: 'block break'
         }
     };
@@ -1460,7 +1720,7 @@ timeline.push(ishiharaReal);
                     <br> We are also interested if the typicality of the sub-categories influences this relationship.
                   Generally, this work is contributing to a body of research that aims to understand the factors that influence how people form associations between colors and concepts.
                   <p>Please copy and paste the below code into CloudResearch to confirm your participation:
-                  <p><strong>+completion_code+</strong>
+                  <p><strong>`+completion_code+`</strong>
                   <p>After you have entered the code in CloudResearch, you can close this page.
                   <p>Thank you for participating! `,
         choices: function(){
